@@ -90,18 +90,21 @@ Future<void> salvarQuestionarioCSVAppend(Questionario q) async {
   final bytesWithBom = <int>[]..addAll(bomUtf8)..addAll(csvBytes);
 
   await file.writeAsBytes(bytesWithBom);
-
 }
 
+/// Gera cabeçalhos fixos para os campos padrão, incluindo PUFA
 List<String> _gerarCabecalhoMapa(Map<String, Map<String, String?>> mapa, String prefixo) {
+  const camposPadrao = ['coroa', 'raiz', 'trat', 'pufa'];
   return mapa.entries.expand((e) {
-    return e.value.keys.map((campo) => '$prefixo-${e.key}-$campo');
+    return camposPadrao.map((campo) => '$prefixo-${e.key}-$campo');
   }).toList();
 }
 
+/// Gera os valores em ordem dos campos, usando '0' quando ausente
 List<String> _gerarValoresMapa(Map<String, Map<String, String?>> mapa) {
+  const camposPadrao = ['coroa', 'raiz', 'trat', 'pufa'];
   return mapa.entries.expand((e) {
-    return e.value.values.map((v) => _extrairCodigo(v));
+    return camposPadrao.map((campo) => _extrairCodigo(e.value[campo]));
   }).toList();
 }
 

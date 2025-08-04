@@ -29,6 +29,7 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   csv: ^5.0.0
+  excel: ^2.0.8
   path_provider: ^2.0.0
   flutter:
     sdk: flutter

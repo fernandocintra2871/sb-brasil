@@ -1,8 +1,10 @@
+import 'package:app_odonto/services/gerar_planilha.dart';
 import 'package:app_odonto/widgets/pagina_questionario.dart';
 import 'package:flutter/material.dart';
 import 'package:app_odonto/models/questionario.dart';
 import 'package:app_odonto/widgets/detalhe_questionario.dart';
-import 'package:app_odonto/services/ler_planilha.dart'; // novo
+import 'package:app_odonto/services/ler_planilha.dart';
+
 
 class ListaQuestionariosPage extends StatefulWidget {
   const ListaQuestionariosPage({super.key});
@@ -32,9 +34,19 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
       context,
       MaterialPageRoute(builder: (_) => const QuestionarioPage()),
     ).then((_) {
-      // Recarregar lista quando voltar do questionário
-      _carregarDados();
+      _carregarDados(); // Recarrega ao voltar
     });
+  }
+
+  Future<void> _gerarExcel() async {
+    List<Questionario> questionarios = await carregarQuestionariosDoCSV();
+    await criarExcelComDados(questionarios);
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Arquivo Excel criado com sucesso!')),
+      );
+    }
   }
 
   @override
@@ -43,6 +55,11 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
       appBar: AppBar(
         title: const Text('Questionários Salvos'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.file_download),
+            tooltip: 'Gerar Excel',
+            onPressed: _gerarExcel,
+          ),
           IconButton(
             icon: const Icon(Icons.add),
             tooltip: 'Novo Questionário',

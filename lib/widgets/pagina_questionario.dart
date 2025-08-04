@@ -24,12 +24,46 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
 
   final PageController _pageController = PageController();
   int _paginaAtual = 0;
-  final int totalPaginas = 12;
+  int totalPaginas = 0; // Agora inicializado dinamicamente
 
   @override
   void initState() {
     super.initState();
     questionario = Questionario();
+
+    _calcularTotalPaginas(); // calcula inicialmente
+  }
+
+  // Método que calcula o total de páginas baseado na idade
+  void _calcularTotalPaginas() {
+    final idade = int.tryParse(questionario.idade ?? '') ?? 0;
+
+    // Sempre tem as duas primeiras seções
+    int paginas = 2;
+
+    // Seções por faixa etária:
+    if (idade == 5) {
+      paginas += 1; // CondicaoOclusaoDentariaSection
+    } else if (idade == 12) {
+      paginas += 3; // TraumatismoDentarioSection, DAISection, MatrixPeriodontal
+    } else if (idade >= 15 && idade <= 19) {
+      paginas += 3; // UsoNecessidadeProteseSection, DAISection, MatrixPeriodontal
+    } else if ((idade >= 35 && idade <= 44) || (idade >= 65 && idade <= 74)) {
+      paginas += 2; // UsoNecessidadeProteseSection, MatrixPeriodontal
+    }
+
+    // Sempre tem 4 MatrizDentaria + Urgencia (total 5)
+    paginas += 5;
+
+    setState(() {
+      totalPaginas = paginas;
+
+      // Ajusta página atual caso extrapole novo total
+      if (_paginaAtual >= totalPaginas) {
+        _paginaAtual = totalPaginas - 1;
+        _pageController.jumpToPage(_paginaAtual);
+      }
+    });
   }
 
   Future<void> _proximaPagina() async {
@@ -100,12 +134,51 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
                   controller: _pageController,
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
-                    //LocalizacaoSection(questionario: questionario, onChanged: () => setState(() {})),
-                    //InformacoesGeraisSection(questionario: questionario, onChanged: () => setState(() {})),
-                    //UsoNecessidadeProteseSection(questionario: questionario, onChanged: () => setState(() {})),
-                    //TraumatismoDentarioSection(questionario: questionario, onChanged: () => setState(() {})),
-                    //CondicaoOclusaoDentariaSection(questionario: questionario, onChanged: () => setState(() {})),
-                    //DAISection(questionario: questionario, onChanged: () => setState(() {})),
+                    // Seções sempre visíveis
+                    LocalizacaoSection(
+                      questionario: questionario,
+                      onChanged: () {
+                        setState(() {});
+                        _calcularTotalPaginas(); // recalcula quando mudar idade (se alterar nessa seção)
+                      },
+                    ),
+                    InformacoesGeraisSection(
+                      questionario: questionario,
+                      onChanged: () {
+                        setState(() {});
+                        _calcularTotalPaginas(); // recalcula quando mudar idade
+                      },
+                    ),
+
+                    // Seções por faixa etária
+                    if ((int.tryParse(questionario.idade ?? '') ?? 0) == 5)
+                      CondicaoOclusaoDentariaSection(
+                        questionario: questionario,
+                        onChanged: () => setState(() {}),
+                      ),
+
+                    if ((int.tryParse(questionario.idade ?? '') ?? 0) == 12) ...[
+                      TraumatismoDentarioSection(questionario: questionario, onChanged: () => setState(() {})),
+                      DAISection(questionario: questionario, onChanged: () => setState(() {})),
+                      MatrixPeriodontal(dados: questionario.condicaoPeriodontal, dentes: const ['16/17', '11', '26/27', '46/47', '31', '36/37']),
+                    ],
+
+                    if ((int.tryParse(questionario.idade ?? '') ?? 0) >= 15 &&
+                        (int.tryParse(questionario.idade ?? '') ?? 0) <= 19) ...[
+                      UsoNecessidadeProteseSection(questionario: questionario, onChanged: () => setState(() {})),
+                      DAISection(questionario: questionario, onChanged: () => setState(() {})),
+                      MatrixPeriodontal(dados: questionario.condicaoPeriodontal, dentes: const ['16/17', '11', '26/27', '46/47', '31', '36/37']),
+                    ],
+
+                    if (((int.tryParse(questionario.idade ?? '') ?? 0) >= 35 &&
+                            (int.tryParse(questionario.idade ?? '') ?? 0) <= 44) ||
+                        ((int.tryParse(questionario.idade ?? '') ?? 0) >= 65 &&
+                            (int.tryParse(questionario.idade ?? '') ?? 0) <= 74)) ...[
+                      UsoNecessidadeProteseSection(questionario: questionario, onChanged: () => setState(() {})),
+                      MatrixPeriodontal(dados: questionario.condicaoPeriodontal, dentes: const ['16/17', '11', '26/27', '46/47', '31', '36/37']),
+                    ],
+
+                    // Sempre visíveis: MatrizDentaria e Urgência
                     MatrizDentaria(
                       quadrante: questionario.quadrante1,
                       linhasComDentes: const ['18', '17', '16', '55', '15', '54', '14', '53', '13', '52', '12', '51', '11'],
@@ -126,10 +199,7 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
                       linhasComDentes: const ['48', '47', '46', '85', '45', '84', '44', '82', '42', '81', '41'],
                       titulo: 'Quadrante 4',
                     ),
-                    MatrixPeriodontal(
-                      dados: questionario.condicaoPeriodontal,
-                      dentes: const ['16/17', '11', '26/27', '46/47', '31', '36/37'],
-                    ),
+
                     DropdownUrgenciaSection(
                       questionario: questionario,
                       onChanged: () => setState(() {}),
@@ -161,4 +231,3 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
     );
   }
 }
-

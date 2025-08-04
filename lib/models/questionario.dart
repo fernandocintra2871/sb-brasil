@@ -83,6 +83,7 @@ class Questionario {
         'coroa': null,
         'raiz': null,
         'trat': null,
+        'pufa': null,
       };
     }
     return mapa;

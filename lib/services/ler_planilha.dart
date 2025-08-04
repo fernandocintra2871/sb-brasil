@@ -72,21 +72,25 @@ Questionario _fromCSV(List<dynamic> linha) {
     q.quadrante1[d]!['coroa'] = linha[i++].toString();
     q.quadrante1[d]!['raiz'] = linha[i++].toString();
     q.quadrante1[d]!['trat'] = linha[i++].toString();
+    q.quadrante1[d]!['pufa'] = linha[i++].toString();
   }
   for (final d in dentesQ2) {
     q.quadrante2[d]!['coroa'] = linha[i++].toString();
     q.quadrante2[d]!['raiz'] = linha[i++].toString();
     q.quadrante2[d]!['trat'] = linha[i++].toString();
+    q.quadrante2[d]!['pufa'] = linha[i++].toString();
   }
   for (final d in dentesQ3) {
     q.quadrante3[d]!['coroa'] = linha[i++].toString();
     q.quadrante3[d]!['raiz'] = linha[i++].toString();
     q.quadrante3[d]!['trat'] = linha[i++].toString();
+    q.quadrante3[d]!['pufa'] = linha[i++].toString();
   }
   for (final d in dentesQ4) {
     q.quadrante4[d]!['coroa'] = linha[i++].toString();
     q.quadrante4[d]!['raiz'] = linha[i++].toString();
     q.quadrante4[d]!['trat'] = linha[i++].toString();
+    q.quadrante4[d]!['pufa'] = linha[i++].toString();
   }
 
   for (final d in dentesPeriodontal) {

@@ -116,6 +116,16 @@ final List<String> listaCoroa = [
   '9 - Dente excluído'
 ];
 
+final List<String> listaCoroaDec = [
+  'A - Hígido',
+  'B - Cariado',
+  'C - Restaurado mas com cárie',
+  'D - Restaurado e sem cárie',
+  'E - Não se aplica Perdido devido à cárie',
+  'F - Não se aplica Apresenta selante',
+  'G - Apoio de ponte ou coroa'
+];
+
 final List<String> listaRaiz = [
   '0 - Hígido',
   '1 - Cariado',
@@ -139,12 +149,23 @@ final List<String> listaTrat = [
   '9 - Sem informação'
 ];
 
+
+
 final List<String> listaPUFA = [
   '0 - Nenhuma consequência clínica de cárie não tratada ',
   'P - Envolvimento pulpar ',
   'U - Ulceração',
   'F - Fístula ',
   'A - Abscesso',
+  '9 - Dente excluído'
+];
+
+final List<String> listaPUFADec = [
+  '0 - Nenhuma consequência clínica de cárie não tratada ',
+  'p - Envolvimento pulpar ',
+  'u - Ulceração',
+  'f - Fístula ',
+  'a - Abscesso',
   '9 - Dente excluído'
 ];
 

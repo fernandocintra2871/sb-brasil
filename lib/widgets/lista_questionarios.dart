@@ -1,9 +1,18 @@
-import 'package:app_odonto/services/gerar_planilha.dart';
+import 'package:app_odonto/services/gerar_planilha_15a19anos.dart';
+import 'package:app_odonto/services/gerar_planilha_35a44anos.dart';
+import 'package:app_odonto/services/gerar_planilha_5anos.dart';
+import 'package:app_odonto/services/gerar_planilha_65a74anos.dart';
+import 'package:app_odonto/services/gerar_planilhar_12anos.dart';
+import 'package:app_odonto/services/subs_quadrantes.dart';
 import 'package:app_odonto/widgets/pagina_questionario.dart';
 import 'package:flutter/material.dart';
 import 'package:app_odonto/models/questionario.dart';
 import 'package:app_odonto/widgets/detalhe_questionario.dart';
 import 'package:app_odonto/services/ler_planilha.dart';
+
+import 'package:share_plus/share_plus.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 
 class ListaQuestionariosPage extends StatefulWidget {
@@ -22,6 +31,35 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
     _carregarDados();
   }
 
+  Future<void> _compartilharPlanilhas() async {
+    final dir = await getExternalStorageDirectory(); // <- mesmo usado no criarExcel
+
+    final arquivos = [
+      File('${dir!.path}/planilha_5.xlsx'),
+      File('${dir.path}/planilha_12.xlsx'),
+      File('${dir.path}/planilha_15a19.xlsx'),
+      File('${dir.path}/planilha_35a44.xlsx'),
+      File('${dir.path}/planilha_65a74.xlsx'),
+    ];
+
+    final existentes = arquivos.where((f) => f.existsSync()).toList();
+
+    if (existentes.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nenhuma planilha encontrada para compartilhar.')),
+      );
+      return;
+    }
+
+    await Share.shareXFiles(
+      existentes.map((f) => XFile(f.path)).toList(),
+      text: 'Aqui estão as planilhas geradas pelo app Odonto 🦷📊',
+    );
+  }
+
+
+
   Future<void> _carregarDados() async {
     final lista = await carregarQuestionariosDoCSV();
     setState(() {
@@ -39,15 +77,57 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
   }
 
   Future<void> _gerarExcel() async {
+    // Lê todos os questionários do CSV
     List<Questionario> questionarios = await carregarQuestionariosDoCSV();
-    await criarExcelComDados(questionarios);
 
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Arquivo Excel criado com sucesso!')),
-      );
-    }
-  }
+    // Filtra por faixa etária
+    List<Questionario> faixa5anos =
+        questionarios.where((q) => int.tryParse(q.idade ?? '0') == 5).toList();
+
+    List<Questionario> faixa12anos =
+        questionarios.where((q) => int.tryParse(q.idade ?? '0') == 12).toList();
+
+    List<Questionario> faixa15a19 =
+        questionarios.where((q) {
+          int idade = int.tryParse(q.idade ?? '0') ?? 0;
+          return idade >= 15 && idade <= 19;
+        }).toList();
+
+    List<Questionario> faixa35a44 =
+        questionarios.where((q) {
+          int idade = int.tryParse(q.idade ?? '0') ?? 0;
+          return idade >= 35 && idade <= 44;
+        }).toList();
+
+    List<Questionario> faixa65a74 =
+        questionarios.where((q) {
+          int idade = int.tryParse(q.idade ?? '0') ?? 0;
+          return idade >= 65 && idade <= 74;
+        }).toList();
+
+    print('Qtd 5 anos: ${faixa5anos.length}');
+    print('Qtd 12 anos: ${faixa12anos.length}');
+    print('Qtd 15 a 19 anos: ${faixa15a19.length}');
+    print('Qtd 35 a 44 anos: ${faixa35a44.length}');
+    print('Qtd 65 a 74 anos: ${faixa65a74.length}');
+
+    // Chama as funções específicas (ainda não criadas)
+    substituirParesDentesEmLista(faixa5anos);
+    await criarExcelFaixa5(faixa5anos);
+    substituirParesDentesEmLista(faixa12anos);
+    await criarExcelFaixa12(faixa12anos);
+    await criarExcelFaixa15a19(faixa15a19);
+    await criarExcelFaixa35a44(faixa35a44);
+    await criarExcelFaixa65a74(faixa65a74); 
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Planilhas Excel criadas com sucesso!')),
+    );
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +139,11 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
             icon: const Icon(Icons.file_download),
             tooltip: 'Gerar Excel',
             onPressed: _gerarExcel,
+          ),
+          IconButton(
+            icon: const Icon(Icons.share),
+            tooltip: 'Compartilhar Planilhas',
+            onPressed: _compartilharPlanilhas,
           ),
           IconButton(
             icon: const Icon(Icons.add),

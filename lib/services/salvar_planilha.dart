@@ -31,19 +31,19 @@ Future<void> salvarQuestionarioCSVAppend(Questionario q) async {
       ..._gerarCabecalhoMapa(q.quadrante2, 'Q2'),
       ..._gerarCabecalhoMapa(q.quadrante3, 'Q3'),
       ..._gerarCabecalhoMapa(q.quadrante4, 'Q4'),
-      ..._gerarCabecalhoMapa(q.condicaoPeriodontal, 'Periodontal'),
+      ..._gerarCabecalhoPeriodontal(q.condicaoPeriodontal), // Changed to specialized function
       'Urgencia',
     ];
     rows.add(header);
   }
 
   List<dynamic> values = [
-    q.codigoMunicipio ?? '0',
-    q.estado ?? '0',
-    q.dataExame ?? '0',
-    q.endereco ?? '0',
-    q.idade ?? '0',
-    q.dataNascimento ?? '0',
+    q.codigoMunicipio ?? '',
+    q.estado ?? '',
+    q.dataExame ?? '',
+    q.endereco ?? '',
+    q.idade ?? '',
+    q.dataNascimento ?? '',
     _extrairCodigo(q.sexo),
     _extrairCodigo(q.corRaca),
     _extrairCodigo(q.usoProteseSup),
@@ -62,11 +62,11 @@ Future<void> salvarQuestionarioCSVAppend(Questionario q) async {
     _extrairCodigo(q.sobressaliencia),
     _extrairCodigo(q.sobremordida),
     _extrairCodigo(q.mordidaCruzadaPosterior),
-    q.condDenticaoSup ?? '0',
-    q.condDenticaoInf ?? '0',
-    q.overjetMax ?? '0',
-    q.overjetMand ?? '0',
-    q.mordidaAberta ?? '0',
+    q.condDenticaoSup ?? '',
+    q.condDenticaoInf ?? '',
+    q.overjetMax ?? '',
+    q.overjetMand ?? '',
+    q.mordidaAberta ?? '',
     _extrairCodigo(q.relacaoMolar),
     _extrairCodigo(q.apinhamentoIncisal),
     _extrairCodigo(q.espacamentoIncisal),
@@ -77,7 +77,7 @@ Future<void> salvarQuestionarioCSVAppend(Questionario q) async {
     ..._gerarValoresMapa(q.quadrante2),
     ..._gerarValoresMapa(q.quadrante3),
     ..._gerarValoresMapa(q.quadrante4),
-    ..._gerarValoresMapa(q.condicaoPeriodontal),
+    ..._gerarValoresPeriodontal(q.condicaoPeriodontal), // Changed to specialized function
     _extrairCodigo(q.urgencia),
   ];
 
@@ -108,9 +108,25 @@ List<String> _gerarValoresMapa(Map<String, Map<String, String?>> mapa) {
   }).toList();
 }
 
+/// Gera cabeçalhos específicos para condição periodontal
+List<String> _gerarCabecalhoPeriodontal(Map<String, Map<String, String?>> mapa) {
+  const camposPeriodontal = ['Sangramento', 'Calculo', 'Bolsa', 'PIP'];
+  return mapa.entries.expand((e) {
+    return camposPeriodontal.map((campo) => 'Periodontal-${e.key}-$campo');
+  }).toList();
+}
+
+/// Gera valores específicos para condição periodontal
+List<String> _gerarValoresPeriodontal(Map<String, Map<String, String?>> mapa) {
+  const camposPeriodontal = ['Sangramento', 'Calculo', 'Bolsa', 'PIP'];
+  return mapa.entries.expand((e) {
+    return camposPeriodontal.map((campo) => _extrairCodigo(e.value[campo]));
+  }).toList();
+}
+
 /// Extrai o valor antes do primeiro " - ", ou retorna '0' se for null.
 String _extrairCodigo(String? valor) {
-  if (valor == null) return '0';
+  if (valor == null) return '';
   final partes = valor.split(RegExp(r'\s*-\s*'));
   return partes.first;
 }

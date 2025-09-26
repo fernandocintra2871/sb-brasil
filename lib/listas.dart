@@ -107,11 +107,11 @@ final List<String> listaCoroa = [
   '1 - Cariado',
   '2 - Restaurado mas com cárie',
   '3 - Restaurado e sem cárie',
-  '4 - Não se aplica Perdido devido à cárie',
-  '5 - Não se aplica Perdido por outras razões',
-  '6 - Não se aplica Apresenta selante',
-  '7 - Apoio de ponte ou coroa',
-  '8 - Não erupcionado - raiz não exposta',
+  '4 - Perdido devido à cárie',
+  '5 - Perdido por outras razões',
+  '6 - Apresenta selante',
+  '7 - Apoio de ponte ou coroa/implante',
+  '8 - Não erupcionado ou raiz não exposta',
   'T - Não se aplica Trauma (fratura)',
   '9 - Dente excluído'
 ];
@@ -121,9 +121,9 @@ final List<String> listaCoroaDec = [
   'B - Cariado',
   'C - Restaurado mas com cárie',
   'D - Restaurado e sem cárie',
-  'E - Não se aplica Perdido devido à cárie',
-  'F - Não se aplica Apresenta selante',
-  'G - Apoio de ponte ou coroa'
+  'E - Perdido devido à cárie',
+  'F - Apresenta selante',
+  'G - Apoio de ponte ou coroa/implante'
 ];
 
 final List<String> listaRaiz = [
@@ -132,7 +132,7 @@ final List<String> listaRaiz = [
   '2 - Restaurado mas com cárie',
   '3 - Restaurado e sem cárie',
   '7 - Apoio de ponte ou coroa',
-  '8 - Não erupcionado - raiz não exposta',
+  '8 - Não erupcionado ou raiz não exposta',
   '9 - Dente excluído'
 ];
 

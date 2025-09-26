@@ -27,18 +27,14 @@ class LocalizacaoSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Código do município
+              // Nome do município
               TextFormField(
-                initialValue: questionario.codigoMunicipio,
-                decoration: const InputDecoration(labelText: 'Código do município'),
-                keyboardType: TextInputType.number,
+                initialValue: questionario.codigoMunicipio, 
+                decoration: const InputDecoration(labelText: 'Nome do município'),
+                keyboardType: TextInputType.text,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Informe o código do município';
-                  }
-                  final n = int.tryParse(value);
-                  if (n == null || n < 0) {
-                    return 'Código de município inválido';
+                    return 'Informe o nome do município';
                   }
                   return null;
                 },
@@ -84,31 +80,24 @@ class LocalizacaoSection extends StatelessWidget {
                         '${picked.month.toString().padLeft(2, '0')}/'
                         '${picked.year}';
                     questionario.dataExame = formatted;
-                    onChanged?.call();
+                    // É importante garantir que o controlador do TextEditingController
+                    // seja atualizado ou que o widget seja reconstruído para refletir o valor.
+                    // Como não estamos usando um StatefulWidget, vamos confiar no onChanged
+                    // do widget pai para forçar uma reconstrução.
+                    onChanged?.call(); 
                   }
                 },
                 validator: (value) =>
                     value == null || value.isEmpty ? 'Informe a data do exame' : null,
               ),
-              const SizedBox(height: 16),
+              // O SizedBox de 16 abaixo não é mais necessário aqui.
+              // const SizedBox(height: 16), // REMOVIDO
 
-              // Endereço
-              TextFormField(
-                initialValue: questionario.endereco,
-                decoration: const InputDecoration(labelText: 'Endereço'),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Informe o endereço' : null,
-                onChanged: (value) {
-                  questionario.endereco = value;
-                  onChanged?.call();
-                },
-              ),
-              const SizedBox(height: 16),
+              // O campo Endereço e seu SizedBox foram removidos.
             ],
           ),
         ),
       ],
     );
   }
-
 }

@@ -3,14 +3,18 @@ import 'package:flutter/material.dart';
 import '../listas.dart'; // ajuste conforme necessário
 
 class MatrixPeriodontal extends StatefulWidget {
-  final Map<String, Map<String, String?>> dados; // Map<Dente, Map<Exame, Valor>>
-  final List<String> dentes; // Exemplo: ['16/17', '11', '26/27', '36/37', '31', '46/47']
+  final Map<String, Map<String, String?>>
+  dados; // Map<Dente, Map<Exame, Valor>>
+  final List<String>
+  dentes; // Exemplo: ['16/17', '11', '26/27', '36/37', '31', '46/47']
   final List<String> exames = ['Sangramento', 'Calculo', 'Bolsa', 'PIP'];
+  final int idade;
 
   MatrixPeriodontal({
     super.key,
     required this.dados,
     required this.dentes,
+    required this.idade,
   });
 
   @override
@@ -109,34 +113,51 @@ class _MatrixPeriodontalState extends State<MatrixPeriodontal> {
           ),
           ...widget.exames.map((exame) {
             final listaOpcoes = _getListaParaExame(exame);
-
-            return Expanded(
-              child: DropdownButtonFormField<String>(
-                value: widget.dados[dente]?[exame],
-                isExpanded: true,
-                items: listaOpcoes
-                    .map((opcao) => DropdownMenuItem(value: opcao, child: Text(opcao, textAlign: TextAlign.center)))
-                    .toList(),
-                onChanged: ativo
-                    ? (val) {
-                        setState(() {
-                          widget.dados[dente]![exame] = val;
-                        });
-                      }
-                    : null,
-                decoration: const InputDecoration(
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            
+            if (exame == 'PIP' && !((widget.idade >= 35 && widget.idade <= 44) || (widget.idade >= 65 && widget.idade <= 74))) {
+              return Expanded(
+                child: const Text(
+                  '-',
+                  textAlign: TextAlign.center,
                 ),
-                disabledHint: const Text(""),
-                validator: (_) {
-                  if (ativo && widget.dados[dente]![exame] == null) {
-                    return 'Obrigatório';
-                  }
-                  return null;
-                },
-              ),
-            );
+              );
+            } else {
+              return Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: widget.dados[dente]?[exame],
+                  isExpanded: true,
+                  items: listaOpcoes
+                      .map(
+                        (opcao) => DropdownMenuItem(
+                          value: opcao,
+                          child: Text(opcao, textAlign: TextAlign.center),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: ativo
+                      ? (val) {
+                          setState(() {
+                            widget.dados[dente]![exame] = val;
+                          });
+                        }
+                      : null,
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
+                  ),
+                  disabledHint: const Text(""),
+                  validator: (_) {
+                    if (ativo && widget.dados[dente]![exame] == null) {
+                      return 'Obrigatório';
+                    }
+                    return null;
+                  },
+                ),
+              );
+            }
           }).toList(),
         ],
       ),

@@ -160,20 +160,20 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
                     if ((int.tryParse(questionario.idade ?? '') ?? 0) == 12) ...[
                       TraumatismoDentarioSection(questionario: questionario, onChanged: () => setState(() {})),
                       DAISection(questionario: questionario, onChanged: () => setState(() {})),
-                      MatrixPeriodontal(dados: questionario.condicaoPeriodontal, dentes: const ['16/17', '11', '26/27', '46/47', '31', '36/37']),
+                      MatrixPeriodontal(dados: questionario.condicaoPeriodontal, dentes: const ['16/17', '11', '26/27', '46/47', '31', '36/37'], idade: int.tryParse(questionario.idade ?? '') ?? 0),
                     ],
 
                     if ((int.tryParse(questionario.idade ?? '') ?? 0) >= 15 &&
                         (int.tryParse(questionario.idade ?? '') ?? 0) <= 19) ...[
                       UsoNecessidadeProteseSection(questionario: questionario, onChanged: () => setState(() {})),
                       DAISection(questionario: questionario, onChanged: () => setState(() {})),
-                      MatrixPeriodontal(dados: questionario.condicaoPeriodontal, dentes: const ['16/17', '11', '26/27', '46/47', '31', '36/37']),
+                      MatrixPeriodontal(dados: questionario.condicaoPeriodontal, dentes: const ['16/17', '11', '26/27', '46/47', '31', '36/37'], idade: int.tryParse(questionario.idade ?? '') ?? 0),
                     ],
 
                     if (((int.tryParse(questionario.idade ?? '') ?? 0) >= 35 && (int.tryParse(questionario.idade ?? '') ?? 0) <= 44) ||
                         ((int.tryParse(questionario.idade ?? '') ?? 0) >= 65 && (int.tryParse(questionario.idade ?? '') ?? 0) <= 74)) ...[
                       UsoNecessidadeProteseSection(questionario: questionario, onChanged: () => setState(() {})),
-                      MatrixPeriodontal(dados: questionario.condicaoPeriodontal, dentes: const ['16/17', '11', '26/27', '46/47', '31', '36/37']),
+                      MatrixPeriodontal(dados: questionario.condicaoPeriodontal, dentes: const ['16/17', '11', '26/27', '46/47', '31', '36/37'], idade: int.tryParse(questionario.idade ?? '') ?? 0),
                     ],
 
                     // Sempre visíveis: MatrizDentaria e Urgência

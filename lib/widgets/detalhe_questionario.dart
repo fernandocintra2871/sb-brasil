@@ -20,8 +20,12 @@ class DetalheQuestionarioPage extends StatelessWidget {
     return Text('$rotulo: ${valor ?? 'N/A'}');
   }
 
-  Widget _buildTabelaDentes(String titulo, Map<String, Map<String, String?>> mapa) {
-    final campos = mapa.values.first.keys.toList(); // Ex: ['coroa', 'raiz', 'trat']
+  Widget _buildTabelaDentes(
+    String titulo,
+    Map<String, Map<String, String?>> mapa,
+  ) {
+    final campos = mapa.values.first.keys
+        .toList(); // Ex: ['coroa', 'raiz', 'trat']
     final dentes = mapa.keys.toList();
 
     return Column(
@@ -29,7 +33,10 @@ class DetalheQuestionarioPage extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(titulo, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          child: Text(
+            titulo,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -43,12 +50,20 @@ class DetalheQuestionarioPage extends StatelessWidget {
                 children: [
                   const Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text('Dente', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: Text(
+                      'Dente',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
-                  ...campos.map((campo) => Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(campo, style: TextStyle(fontWeight: FontWeight.bold)),
-                      )),
+                  ...campos.map(
+                    (campo) => Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        campo,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               // Linhas
@@ -60,10 +75,12 @@ class DetalheQuestionarioPage extends StatelessWidget {
                       padding: const EdgeInsets.all(6.0),
                       child: Text(dente),
                     ),
-                    ...campos.map((campo) => Padding(
-                          padding: const EdgeInsets.all(6.0),
-                          child: Text(dados[campo] ?? 'N/A'),
-                        )),
+                    ...campos.map(
+                      (campo) => Padding(
+                        padding: const EdgeInsets.all(6.0),
+                        child: Text(dados[campo] ?? 'N/A'),
+                      ),
+                    ),
                   ],
                 );
               }).toList(),
@@ -94,46 +111,72 @@ class DetalheQuestionarioPage extends StatelessWidget {
           _buildLinha('Sexo', questionario.sexo),
           _buildLinha('Cor/Raça', questionario.corRaca),
 
-          _buildTitulo('Uso e Necessidade de Prótese'),
-          _buildLinha('Uso Prótese Superior', questionario.usoProteseSup),
-          _buildLinha('Uso Prótese Inferior', questionario.usoProteseInf),
-          _buildLinha('Nec. Prótese Superior', questionario.necProteseSup),
-          _buildLinha('Nec. Prótese Inferior', questionario.necProteseInf),
+          if (((int.tryParse(questionario.idade ?? '') ?? 0) >= 15 && (int.tryParse(questionario.idade ?? '') ?? 0) <= 19) ||
+              ((int.tryParse(questionario.idade ?? '') ?? 0) >= 35 && (int.tryParse(questionario.idade ?? '') ?? 0) <= 44) ||
+              ((int.tryParse(questionario.idade ?? '') ?? 0) >= 65 && (int.tryParse(questionario.idade ?? '') ?? 0) <= 74)) ...[
+            _buildTitulo('Uso e Necessidade de Prótese'),
+            _buildLinha('Uso Prótese Superior', questionario.usoProteseSup),
+            _buildLinha('Uso Prótese Inferior', questionario.usoProteseInf),
+            _buildLinha('Nec. Prótese Superior', questionario.necProteseSup),
+            _buildLinha('Nec. Prótese Inferior', questionario.necProteseInf),
+          ],
 
-          _buildTitulo('Traumatismo Dentário'),
-          _buildLinha('Dente 12', questionario.trauDentario12),
-          _buildLinha('Dente 11', questionario.trauDentario11),
-          _buildLinha('Dente 21', questionario.trauDentario21),
-          _buildLinha('Dente 22', questionario.trauDentario22),
-          _buildLinha('Dente 32', questionario.trauDentario32),
-          _buildLinha('Dente 31', questionario.trauDentario31),
-          _buildLinha('Dente 41', questionario.trauDentario41),
-          _buildLinha('Dente 42', questionario.trauDentario42),
 
-          _buildTitulo('Condição da Oclusão Dentária'),
-          _buildLinha('Chave Caninos', questionario.chaveCaninos),
-          _buildLinha('Sobressaliência', questionario.sobressaliencia),
-          _buildLinha('Sobremordida', questionario.sobremordida),
-          _buildLinha('Mordida Cruzada Posterior', questionario.mordidaCruzadaPosterior),
+          if ((int.tryParse(questionario.idade ?? '') ?? 0) == 12) ...[
+            _buildTitulo('Traumatismo Dentário'),
+            _buildLinha('Dente 12', questionario.trauDentario12),
+            _buildLinha('Dente 11', questionario.trauDentario11),
+            _buildLinha('Dente 21', questionario.trauDentario21),
+            _buildLinha('Dente 22', questionario.trauDentario22),
+            _buildLinha('Dente 32', questionario.trauDentario32),
+            _buildLinha('Dente 31', questionario.trauDentario31),
+            _buildLinha('Dente 41', questionario.trauDentario41),
+            _buildLinha('Dente 42', questionario.trauDentario42),
+          ],
 
-          _buildTitulo('DAI - Dentição'),
-          _buildLinha('Dentição Superior', questionario.condDenticaoSup),
-          _buildLinha('Dentição Inferior', questionario.condDenticaoInf),
+          if (((int.tryParse(questionario.idade ?? '') ?? 0) == 5) ||
+              ((int.tryParse(questionario.idade ?? '') ?? 0) == 12) ||
+              ((int.tryParse(questionario.idade ?? '') ?? 0) >= 15 && (int.tryParse(questionario.idade ?? '') ?? 0) <= 19)) ...[
+            _buildTitulo('Condição da Oclusão Dentária'),
+          ],
 
-          _buildTitulo('Overjet'),
-          _buildLinha('Overjet Maxilar', questionario.overjetMax),
-          _buildLinha('Overjet Mandibular', questionario.overjetMand),
-          _buildLinha('Mordida Aberta', questionario.mordidaAberta),
+          if ((int.tryParse(questionario.idade ?? '') ?? 0) == 5) ...[
+            _buildLinha('Chave Caninos', questionario.chaveCaninos),
+            _buildLinha('Sobressaliência', questionario.sobressaliencia),
+            _buildLinha('Sobremordida', questionario.sobremordida),
+            _buildLinha(
+              'Mordida Cruzada Posterior',
+              questionario.mordidaCruzadaPosterior,
+            ),
+          ],
 
-          _buildTitulo('Relação Molar'),
-          _buildLinha('Relação Molar', questionario.relacaoMolar),
+          if (((int.tryParse(questionario.idade ?? '') ?? 0) == 12) ||
+              ((int.tryParse(questionario.idade ?? '') ?? 0) >= 15 && (int.tryParse(questionario.idade ?? '') ?? 0) <= 19)) ...[
+            _buildTitulo('DAI - Dentição'),
+            _buildLinha('Dentição Superior', questionario.condDenticaoSup),
+            _buildLinha('Dentição Inferior', questionario.condDenticaoInf),
 
-          _buildTitulo('Espaço'),
-          _buildLinha('Apinhamento Incisal', questionario.apinhamentoIncisal),
-          _buildLinha('Espaçamento Incisal', questionario.espacamentoIncisal),
-          _buildLinha('Diastema Incisal', questionario.diastemaIncisal),
-          _buildLinha('Desalinhamento Maxilar', questionario.desalinhamentoMax),
-          _buildLinha('Desalinhamento Mandibular', questionario.desalinhamentoMand),
+            _buildTitulo('Overjet'),
+            _buildLinha('Overjet Maxilar', questionario.overjetMax),
+            _buildLinha('Overjet Mandibular', questionario.overjetMand),
+            _buildLinha('Mordida Aberta', questionario.mordidaAberta),
+
+            _buildTitulo('Relação Molar'),
+            _buildLinha('Relação Molar', questionario.relacaoMolar),
+
+            _buildTitulo('Espaço'),
+            _buildLinha('Apinhamento Incisal', questionario.apinhamentoIncisal),
+            _buildLinha('Espaçamento Incisal', questionario.espacamentoIncisal),
+            _buildLinha('Diastema Incisal', questionario.diastemaIncisal),
+            _buildLinha(
+              'Desalinhamento Maxilar',
+              questionario.desalinhamentoMax,
+            ),
+            _buildLinha(
+              'Desalinhamento Mandibular',
+              questionario.desalinhamentoMand,
+            ),
+          ],
 
           _buildTitulo('Quadro de Cárie por Quadrante'),
           _buildTabelaDentes('Quadrante 1', questionario.quadrante1),
@@ -141,11 +184,17 @@ class DetalheQuestionarioPage extends StatelessWidget {
           _buildTabelaDentes('Quadrante 3', questionario.quadrante3),
           _buildTabelaDentes('Quadrante 4', questionario.quadrante4),
 
-          _buildTitulo('Condição Periodontal'),
-          _buildTabelaDentes('Periodontal', questionario.condicaoPeriodontal),
+          if (((int.tryParse(questionario.idade ?? '') ?? 0) == 12) ||
+              ((int.tryParse(questionario.idade ?? '') ?? 0) >= 15 && (int.tryParse(questionario.idade ?? '') ?? 0) <= 19) ||
+              ((int.tryParse(questionario.idade ?? '') ?? 0) >= 35 && (int.tryParse(questionario.idade ?? '') ?? 0) <= 44) ||
+              ((int.tryParse(questionario.idade ?? '') ?? 0) >= 65 && (int.tryParse(questionario.idade ?? '') ?? 0) <= 74)) ...[
+            _buildTitulo('Condição Periodontal'),
+            _buildTabelaDentes('Periodontal', questionario.condicaoPeriodontal),
+          ],
 
           _buildTitulo('Urgência'),
           _buildLinha('Urgência', questionario.urgencia),
+          
         ],
       ),
     );

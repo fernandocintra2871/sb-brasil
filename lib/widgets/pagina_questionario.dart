@@ -170,10 +170,8 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
                       MatrixPeriodontal(dados: questionario.condicaoPeriodontal, dentes: const ['16/17', '11', '26/27', '46/47', '31', '36/37']),
                     ],
 
-                    if (((int.tryParse(questionario.idade ?? '') ?? 0) >= 35 &&
-                            (int.tryParse(questionario.idade ?? '') ?? 0) <= 44) ||
-                        ((int.tryParse(questionario.idade ?? '') ?? 0) >= 65 &&
-                            (int.tryParse(questionario.idade ?? '') ?? 0) <= 74)) ...[
+                    if (((int.tryParse(questionario.idade ?? '') ?? 0) >= 35 && (int.tryParse(questionario.idade ?? '') ?? 0) <= 44) ||
+                        ((int.tryParse(questionario.idade ?? '') ?? 0) >= 65 && (int.tryParse(questionario.idade ?? '') ?? 0) <= 74)) ...[
                       UsoNecessidadeProteseSection(questionario: questionario, onChanged: () => setState(() {})),
                       MatrixPeriodontal(dados: questionario.condicaoPeriodontal, dentes: const ['16/17', '11', '26/27', '46/47', '31', '36/37']),
                     ],

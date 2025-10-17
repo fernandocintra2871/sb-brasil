@@ -110,7 +110,7 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Questionário removido com sucesso!'),
+          content: Text('Questionário removido.'),
           backgroundColor: Colors.green,
         ),
       );

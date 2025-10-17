@@ -76,6 +76,51 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
     });
   }
 
+  Future<bool> _removerQuestionario(
+    Questionario questionario,
+    int index,
+  ) async {
+    // Mostrar diálogo de confirmação
+    bool confirmado = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar exclusão'),
+        content: const Text(
+          'Tem certeza que deseja excluir este questionário?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmado == true) {
+      setState(() {
+        questionarios.removeAt(index);
+      });
+
+      // TODO: Implementar a remoção do questionário do arquivo CSV
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Questionário removido com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      return true;
+    }
+
+    return false;
+  }
+
   Future<void> _gerarExcel() async {
     // Lê todos os questionários do CSV
     List<Questionario> questionarios = await carregarQuestionariosDoCSV();
@@ -131,6 +176,10 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
     await _compartilharPlanilhas();
   }
 
+  String _gerarChaveUnica(Questionario q) {
+    return '${q.dataExame ?? ''}_${q.idade ?? ''}_${q.estado ?? ''}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -155,19 +204,41 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
               itemCount: questionarios.length,
               itemBuilder: (context, index) {
                 final q = questionarios[index];
-                return ListTile(
-                  title: Text('Exame em: ${q.dataExame}'),
-                  subtitle: Text('UF: ${q.estado}, Idade: ${q.idade}'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            DetalheQuestionarioPage(questionario: q),
-                      ),
-                    );
+                return Dismissible(
+                  key: Key(_gerarChaveUnica(q)), // Chave única
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  confirmDismiss: (direction) async {
+                    return await _removerQuestionario(q, index);
                   },
+                  child: ListTile(
+                    title: Text('Exame em: ${q.dataExame}'),
+                    subtitle: Text('UF: ${q.estado}, Idade: ${q.idade}'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _removerQuestionario(q, index),
+                        ),
+                        const Icon(Icons.chevron_right),
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              DetalheQuestionarioPage(questionario: q),
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             ),

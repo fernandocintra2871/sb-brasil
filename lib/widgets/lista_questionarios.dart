@@ -14,7 +14,6 @@ import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
-
 class ListaQuestionariosPage extends StatefulWidget {
   const ListaQuestionariosPage({super.key});
 
@@ -32,7 +31,8 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
   }
 
   Future<void> _compartilharPlanilhas() async {
-    final dir = await getExternalStorageDirectory(); // <- mesmo usado no criarExcel
+    final dir =
+        await getExternalStorageDirectory(); // <- mesmo usado no criarExcel
 
     final arquivos = [
       File('${dir!.path}/planilha_5.xlsx'),
@@ -47,7 +47,9 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
     if (existentes.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nenhuma planilha encontrada para compartilhar.')),
+        const SnackBar(
+          content: Text('Nenhuma planilha encontrada para compartilhar.'),
+        ),
       );
       return;
     }
@@ -57,8 +59,6 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
       text: 'Aqui estão as planilhas geradas pelo app Odonto 🦷📊',
     );
   }
-
-
 
   Future<void> _carregarDados() async {
     final lista = await carregarQuestionariosDoCSV();
@@ -81,29 +81,28 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
     List<Questionario> questionarios = await carregarQuestionariosDoCSV();
 
     // Filtra por faixa etária
-    List<Questionario> faixa5anos =
-        questionarios.where((q) => int.tryParse(q.idade ?? '0') == 5).toList();
+    List<Questionario> faixa5anos = questionarios
+        .where((q) => int.tryParse(q.idade ?? '0') == 5)
+        .toList();
 
-    List<Questionario> faixa12anos =
-        questionarios.where((q) => int.tryParse(q.idade ?? '0') == 12).toList();
+    List<Questionario> faixa12anos = questionarios
+        .where((q) => int.tryParse(q.idade ?? '0') == 12)
+        .toList();
 
-    List<Questionario> faixa15a19 =
-        questionarios.where((q) {
-          int idade = int.tryParse(q.idade ?? '0') ?? 0;
-          return idade >= 15 && idade <= 19;
-        }).toList();
+    List<Questionario> faixa15a19 = questionarios.where((q) {
+      int idade = int.tryParse(q.idade ?? '0') ?? 0;
+      return idade >= 15 && idade <= 19;
+    }).toList();
 
-    List<Questionario> faixa35a44 =
-        questionarios.where((q) {
-          int idade = int.tryParse(q.idade ?? '0') ?? 0;
-          return idade >= 35 && idade <= 44;
-        }).toList();
+    List<Questionario> faixa35a44 = questionarios.where((q) {
+      int idade = int.tryParse(q.idade ?? '0') ?? 0;
+      return idade >= 35 && idade <= 44;
+    }).toList();
 
-    List<Questionario> faixa65a74 =
-        questionarios.where((q) {
-          int idade = int.tryParse(q.idade ?? '0') ?? 0;
-          return idade >= 65 && idade <= 74;
-        }).toList();
+    List<Questionario> faixa65a74 = questionarios.where((q) {
+      int idade = int.tryParse(q.idade ?? '0') ?? 0;
+      return idade >= 65 && idade <= 74;
+    }).toList();
 
     print('Qtd 5 anos: ${faixa5anos.length}');
     print('Qtd 12 anos: ${faixa12anos.length}');
@@ -118,16 +117,19 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
     await criarExcelFaixa12(faixa12anos);
     await criarExcelFaixa15a19(faixa15a19);
     await criarExcelFaixa35a44(faixa35a44);
-    await criarExcelFaixa65a74(faixa65a74); 
+    await criarExcelFaixa65a74(faixa65a74);
 
     if (!context.mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Planilhas Excel criadas com sucesso!')),
     );
-}
+  }
 
-
+  Future<void> _sincronizarDados() async {
+    await _gerarExcel();
+    await _compartilharPlanilhas();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,14 +138,9 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
         title: const Text('Questionários Salvos'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.file_download),
-            tooltip: 'Gerar Excel',
-            onPressed: _gerarExcel,
-          ),
-          IconButton(
-            icon: const Icon(Icons.share),
-            tooltip: 'Compartilhar Planilhas',
-            onPressed: _compartilharPlanilhas,
+            icon: const Icon(Icons.file_upload),
+            tooltip: 'Gerar planilhas e Sincronizar',
+            onPressed: _sincronizarDados,
           ),
           IconButton(
             icon: const Icon(Icons.add),
@@ -166,7 +163,8 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => DetalheQuestionarioPage(questionario: q),
+                        builder: (_) =>
+                            DetalheQuestionarioPage(questionario: q),
                       ),
                     );
                   },

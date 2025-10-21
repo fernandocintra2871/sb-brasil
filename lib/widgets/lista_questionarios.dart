@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:app_odonto/models/questionario.dart';
 import 'package:app_odonto/widgets/detalhe_questionario.dart';
 import 'package:app_odonto/services/ler_planilha.dart';
+import 'package:app_odonto/services/salvar_planilha.dart';
 
 import 'package:share_plus/share_plus.dart';
 import 'dart:io';
@@ -103,10 +104,9 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
 
     if (confirmado == true) {
       setState(() {
+        removerQuestionarioDoCSV(questionario);
         questionarios.removeAt(index);
       });
-
-      // TODO: Implementar a remoção do questionário do arquivo CSV
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

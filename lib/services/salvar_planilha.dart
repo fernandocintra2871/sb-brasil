@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'dart:convert';
 
+/// Salva um questionário no arquivo CSV, adicionando uma nova linha
 Future<void> salvarQuestionarioCSVAppend(Questionario q) async {
   final directory = await getExternalStorageDirectory();
   final path = directory!.path;
@@ -90,6 +91,110 @@ Future<void> salvarQuestionarioCSVAppend(Questionario q) async {
   final bytesWithBom = <int>[]..addAll(bomUtf8)..addAll(csvBytes);
 
   await file.writeAsBytes(bytesWithBom);
+}
+
+/// Remove um questionário específico do arquivo CSV
+Future<void> removerQuestionarioDoCSV(Questionario questionarioParaRemover) async {
+  try {
+    final directory = await getExternalStorageDirectory();
+    final path = directory!.path;
+    final file = File('$path/dados_formulario.csv');
+
+    // Se o arquivo não existe, não há nada para remover
+    if (!await file.exists()) return;
+
+    // Lê todo o conteúdo do CSV
+    final csvString = await file.readAsString();
+    List<List<dynamic>> rows = const CsvToListConverter().convert(csvString);
+
+    // Se não há dados, retorna
+    if (rows.length <= 1) return; // Apenas cabeçalho ou vazio
+
+    // Converte o questionário para uma linha CSV para comparação
+    final linhaParaRemover = _questionarioParaLinhaCSV(questionarioParaRemover);
+
+    // Filtra as linhas, mantendo apenas as que são diferentes da linha a ser removida
+    // Pula o cabeçalho (primeira linha) na comparação
+    final linhasFiltradas = [rows.first] + // Mantém o cabeçalho
+        rows.skip(1).where((linha) => !_linhasSaoIguais(linha, linhaParaRemover)).toList();
+
+    // Se o número de linhas diminuiu, significa que removemos uma entrada
+    if (linhasFiltradas.length < rows.length) {
+      // Converte de volta para CSV
+      String csvData = const ListToCsvConverter().convert(linhasFiltradas);
+      
+      // Adiciona BOM para garantir compatibilidade com Excel
+      final bomUtf8 = utf8.encode('\uFEFF');
+      final csvBytes = utf8.encode(csvData);
+      final bytesWithBom = <int>[]..addAll(bomUtf8)..addAll(csvBytes);
+
+      // Reescreve o arquivo
+      await file.writeAsBytes(bytesWithBom);
+    }
+  } catch (e) {
+    print('Erro ao remover questionário do CSV: $e');
+    throw Exception('Falha ao remover questionário do arquivo');
+  }
+}
+
+/// Converte um questionário para uma linha CSV (sem o cabeçalho)
+List<dynamic> _questionarioParaLinhaCSV(Questionario q) {
+  return [
+    q.codigoMunicipio ?? '',
+    q.estado ?? '',
+    q.dataExame ?? '',
+    q.endereco ?? '',
+    q.idade ?? '',
+    q.dataNascimento ?? '',
+    _extrairCodigo(q.sexo),
+    _extrairCodigo(q.corRaca),
+    _extrairCodigo(q.usoProteseSup),
+    _extrairCodigo(q.usoProteseInf),
+    _extrairCodigo(q.necProteseSup),
+    _extrairCodigo(q.necProteseInf),
+    _extrairCodigo(q.trauDentario12),
+    _extrairCodigo(q.trauDentario11),
+    _extrairCodigo(q.trauDentario21),
+    _extrairCodigo(q.trauDentario22),
+    _extrairCodigo(q.trauDentario32),
+    _extrairCodigo(q.trauDentario31),
+    _extrairCodigo(q.trauDentario41),
+    _extrairCodigo(q.trauDentario42),
+    _extrairCodigo(q.chaveCaninos),
+    _extrairCodigo(q.sobressaliencia),
+    _extrairCodigo(q.sobremordida),
+    _extrairCodigo(q.mordidaCruzadaPosterior),
+    q.condDenticaoSup ?? '',
+    q.condDenticaoInf ?? '',
+    q.overjetMax ?? '',
+    q.overjetMand ?? '',
+    q.mordidaAberta ?? '',
+    _extrairCodigo(q.relacaoMolar),
+    _extrairCodigo(q.apinhamentoIncisal),
+    _extrairCodigo(q.espacamentoIncisal),
+    q.diastemaIncisal ?? '0',
+    q.desalinhamentoMax ?? '0',
+    q.desalinhamentoMand ?? '0',
+    ..._gerarValoresMapa(q.quadrante1),
+    ..._gerarValoresMapa(q.quadrante2),
+    ..._gerarValoresMapa(q.quadrante3),
+    ..._gerarValoresMapa(q.quadrante4),
+    ..._gerarValoresPeriodontal(q.condicaoPeriodontal),
+    _extrairCodigo(q.urgencia),
+  ];
+}
+
+/// Compara duas linhas CSV para verificar se são iguais
+bool _linhasSaoIguais(List<dynamic> linha1, List<dynamic> linha2) {
+  if (linha1.length != linha2.length) return false;
+  
+  for (int i = 0; i < linha1.length; i++) {
+    if (linha1[i].toString() != linha2[i].toString()) {
+      return false;
+    }
+  }
+  
+  return true;
 }
 
 /// Gera cabeçalhos fixos para os campos padrão, incluindo PUFA

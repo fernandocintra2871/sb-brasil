@@ -9,11 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:app_odonto/models/questionario.dart';
 import 'package:app_odonto/widgets/detalhe_questionario.dart';
 import 'package:app_odonto/services/ler_planilha.dart';
+import 'package:app_odonto/services/salvar_planilha.dart';
 
 import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-
 
 class ListaQuestionariosPage extends StatefulWidget {
   const ListaQuestionariosPage({super.key});
@@ -32,7 +32,8 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
   }
 
   Future<void> _compartilharPlanilhas() async {
-    final dir = await getExternalStorageDirectory(); // <- mesmo usado no criarExcel
+    final dir =
+        await getExternalStorageDirectory(); // <- mesmo usado no criarExcel
 
     final arquivos = [
       File('${dir!.path}/planilha_5.xlsx'),
@@ -47,7 +48,9 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
     if (existentes.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nenhuma planilha encontrada para compartilhar.')),
+        const SnackBar(
+          content: Text('Nenhuma planilha encontrada para compartilhar.'),
+        ),
       );
       return;
     }
@@ -57,8 +60,6 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
       text: 'Aqui estão as planilhas geradas pelo app Odonto 🦷📊',
     );
   }
-
-
 
   Future<void> _carregarDados() async {
     final lista = await carregarQuestionariosDoCSV();
@@ -76,34 +77,77 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
     });
   }
 
+  Future<bool> _removerQuestionario(
+    Questionario questionario,
+    int index,
+  ) async {
+    // Mostrar diálogo de confirmação
+    bool confirmado = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar exclusão'),
+        content: const Text(
+          'Tem certeza que deseja excluir este questionário?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmado == true) {
+      setState(() {
+        removerQuestionarioDoCSV(questionario);
+        questionarios.removeAt(index);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Questionário removido.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      return true;
+    }
+
+    return false;
+  }
+
   Future<void> _gerarExcel() async {
     // Lê todos os questionários do CSV
     List<Questionario> questionarios = await carregarQuestionariosDoCSV();
 
     // Filtra por faixa etária
-    List<Questionario> faixa5anos =
-        questionarios.where((q) => int.tryParse(q.idade ?? '0') == 5).toList();
+    List<Questionario> faixa5anos = questionarios
+        .where((q) => int.tryParse(q.idade ?? '0') == 5)
+        .toList();
 
-    List<Questionario> faixa12anos =
-        questionarios.where((q) => int.tryParse(q.idade ?? '0') == 12).toList();
+    List<Questionario> faixa12anos = questionarios
+        .where((q) => int.tryParse(q.idade ?? '0') == 12)
+        .toList();
 
-    List<Questionario> faixa15a19 =
-        questionarios.where((q) {
-          int idade = int.tryParse(q.idade ?? '0') ?? 0;
-          return idade >= 15 && idade <= 19;
-        }).toList();
+    List<Questionario> faixa15a19 = questionarios.where((q) {
+      int idade = int.tryParse(q.idade ?? '0') ?? 0;
+      return idade >= 15 && idade <= 19;
+    }).toList();
 
-    List<Questionario> faixa35a44 =
-        questionarios.where((q) {
-          int idade = int.tryParse(q.idade ?? '0') ?? 0;
-          return idade >= 35 && idade <= 44;
-        }).toList();
+    List<Questionario> faixa35a44 = questionarios.where((q) {
+      int idade = int.tryParse(q.idade ?? '0') ?? 0;
+      return idade >= 35 && idade <= 44;
+    }).toList();
 
-    List<Questionario> faixa65a74 =
-        questionarios.where((q) {
-          int idade = int.tryParse(q.idade ?? '0') ?? 0;
-          return idade >= 65 && idade <= 74;
-        }).toList();
+    List<Questionario> faixa65a74 = questionarios.where((q) {
+      int idade = int.tryParse(q.idade ?? '0') ?? 0;
+      return idade >= 65 && idade <= 74;
+    }).toList();
 
     print('Qtd 5 anos: ${faixa5anos.length}');
     print('Qtd 12 anos: ${faixa12anos.length}');
@@ -118,16 +162,23 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
     await criarExcelFaixa12(faixa12anos);
     await criarExcelFaixa15a19(faixa15a19);
     await criarExcelFaixa35a44(faixa35a44);
-    await criarExcelFaixa65a74(faixa65a74); 
+    await criarExcelFaixa65a74(faixa65a74);
 
     if (!context.mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Planilhas Excel criadas com sucesso!')),
     );
-}
+  }
 
+  Future<void> _sincronizarDados() async {
+    await _gerarExcel();
+    await _compartilharPlanilhas();
+  }
 
+  String _gerarChaveUnica(Questionario q) {
+    return '${q.dataExame ?? ''}_${q.idade ?? ''}_${q.estado ?? ''}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,14 +187,9 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
         title: const Text('Questionários Salvos'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.file_download),
-            tooltip: 'Gerar Excel',
-            onPressed: _gerarExcel,
-          ),
-          IconButton(
-            icon: const Icon(Icons.share),
-            tooltip: 'Compartilhar Planilhas',
-            onPressed: _compartilharPlanilhas,
+            icon: const Icon(Icons.file_upload),
+            tooltip: 'Gerar planilhas e Sincronizar',
+            onPressed: _sincronizarDados,
           ),
           IconButton(
             icon: const Icon(Icons.add),
@@ -158,18 +204,41 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
               itemCount: questionarios.length,
               itemBuilder: (context, index) {
                 final q = questionarios[index];
-                return ListTile(
-                  title: Text('Exame em: ${q.dataExame}'),
-                  subtitle: Text('UF: ${q.estado}, Idade: ${q.idade}'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => DetalheQuestionarioPage(questionario: q),
-                      ),
-                    );
+                return Dismissible(
+                  key: Key(_gerarChaveUnica(q)), // Chave única
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  confirmDismiss: (direction) async {
+                    return await _removerQuestionario(q, index);
                   },
+                  child: ListTile(
+                    title: Text('Exame em: ${q.dataExame}'),
+                    subtitle: Text('UF: ${q.estado}, Idade: ${q.idade}'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _removerQuestionario(q, index),
+                        ),
+                        const Icon(Icons.chevron_right),
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              DetalheQuestionarioPage(questionario: q),
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             ),

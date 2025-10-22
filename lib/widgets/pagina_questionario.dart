@@ -160,19 +160,20 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
                     if ((int.tryParse(questionario.idade ?? '') ?? 0) == 12) ...[
                       TraumatismoDentarioSection(questionario: questionario, onChanged: () => setState(() {})),
                       DAISection(questionario: questionario, onChanged: () => setState(() {})),
+                      MatrixPeriodontal(dados: questionario.condicaoPeriodontal, dentes: const ['16/17', '11', '26/27', '46/47', '31', '36/37'], idade: int.tryParse(questionario.idade ?? '') ?? 0),
                     ],
 
                     if ((int.tryParse(questionario.idade ?? '') ?? 0) >= 15 &&
                         (int.tryParse(questionario.idade ?? '') ?? 0) <= 19) ...[
                       UsoNecessidadeProteseSection(questionario: questionario, onChanged: () => setState(() {})),
                       DAISection(questionario: questionario, onChanged: () => setState(() {})),
+                      MatrixPeriodontal(dados: questionario.condicaoPeriodontal, dentes: const ['16/17', '11', '26/27', '46/47', '31', '36/37'], idade: int.tryParse(questionario.idade ?? '') ?? 0),
                     ],
 
-                    if (((int.tryParse(questionario.idade ?? '') ?? 0) >= 35 &&
-                            (int.tryParse(questionario.idade ?? '') ?? 0) <= 44) ||
-                        ((int.tryParse(questionario.idade ?? '') ?? 0) >= 65 &&
-                            (int.tryParse(questionario.idade ?? '') ?? 0) <= 74)) ...[
+                    if (((int.tryParse(questionario.idade ?? '') ?? 0) >= 35 && (int.tryParse(questionario.idade ?? '') ?? 0) <= 44) ||
+                        ((int.tryParse(questionario.idade ?? '') ?? 0) >= 65 && (int.tryParse(questionario.idade ?? '') ?? 0) <= 74)) ...[
                       UsoNecessidadeProteseSection(questionario: questionario, onChanged: () => setState(() {})),
+                      MatrixPeriodontal(dados: questionario.condicaoPeriodontal, dentes: const ['16/17', '11', '26/27', '46/47', '31', '36/37'], idade: int.tryParse(questionario.idade ?? '') ?? 0),
                     ],
 
                     // Sempre visíveis: MatrizDentaria e Urgência
@@ -190,20 +191,16 @@ class _QuestionarioPageState extends State<QuestionarioPage> {
                     ),
                     MatrizDentaria(
                       quadrante: questionario.quadrante3,
-                      linhasComDentes: const ['38', '37', '36', '75', '35', '74', '34', '73','33', '72', '32',  '71', '31'],
+                      linhasComDentes: const ['71', '31', '72', '32', '73', '33', '74', '34', '75', '35', '36', '37', '38'],
                       titulo: 'Quadrante 3',
                       idade: int.tryParse(questionario.idade ?? '') ?? 0,
                     ),
                     MatrizDentaria(
                       quadrante: questionario.quadrante4,
-                      linhasComDentes: const [ '81', '41', '82', '42', '83', '43', '84', '44', '85', '45', '46', '47', '48'],
+                      linhasComDentes: const ['48', '47', '46', '85', '45', '84', '44', '83', '43', '82', '42', '81', '41'],
                       titulo: 'Quadrante 4',
                       idade: int.tryParse(questionario.idade ?? '') ?? 0,
                     ),
-
-                    if ((int.tryParse(questionario.idade ?? '') ?? 0) != 5) ...[
-                      MatrixPeriodontal(dados: questionario.condicaoPeriodontal, dentes: const ['16/17', '11', '26/27', '36/37', '31', '46/47'],idade: int.tryParse(questionario.idade ?? '') ?? 0,),
-                    ],
 
                     DropdownUrgenciaSection(
                       questionario: questionario,

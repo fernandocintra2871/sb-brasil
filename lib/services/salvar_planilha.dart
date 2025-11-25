@@ -21,18 +21,34 @@ Future<void> salvarQuestionarioCSVAppend(Questionario q) async {
     List<String> header = [
       'Codigo Municipio', 'Estado', 'Data Exame', 'Endereco',
       'Idade', 'Data Nasc.', 'Sexo', 'Cor/Raca',
-      'Uso Protese Sup', 'Uso Protese Inf', 'Nec. Protese Sup', 'Nec. Protese Inf',
-      'TrauDent 12', 'TrauDent 11', 'TrauDent 21', 'TrauDent 22', 'TrauDent 32', 'TrauDent 31', 'TrauDent 41', 'TrauDent 42',
+      'Uso Protese Sup',
+      'Uso Protese Inf',
+      'Nec. Protese Sup',
+      'Nec. Protese Inf',
+      'TrauDent 12',
+      'TrauDent 11',
+      'TrauDent 21',
+      'TrauDent 22',
+      'TrauDent 32',
+      'TrauDent 31',
+      'TrauDent 41',
+      'TrauDent 42',
       'Chave Caninos', 'Sobressalencia', 'Sobremordida', 'Mord. Cruz. Post.',
       'Denticao Sup', 'Denticao Inf',
       'Overjet Max', 'Overjet Mand', 'Mordida Aberta',
       'Relacao Molar',
-      'Apinhamento', 'Espacamento', 'Diastema', 'Desalinh. Max', 'Desalinh. Mand',
+      'Apinhamento',
+      'Espacamento',
+      'Diastema',
+      'Desalinh. Max',
+      'Desalinh. Mand',
       ..._gerarCabecalhoMapa(q.quadrante1, 'Q1'),
       ..._gerarCabecalhoMapa(q.quadrante2, 'Q2'),
       ..._gerarCabecalhoMapa(q.quadrante3, 'Q3'),
       ..._gerarCabecalhoMapa(q.quadrante4, 'Q4'),
-      ..._gerarCabecalhoPeriodontal(q.condicaoPeriodontal), // Changed to specialized function
+      ..._gerarCabecalhoPeriodontal(
+        q.condicaoPeriodontal,
+      ), // Changed to specialized function
       'Urgencia',
     ];
     rows.add(header);
@@ -78,7 +94,9 @@ Future<void> salvarQuestionarioCSVAppend(Questionario q) async {
     ..._gerarValoresMapa(q.quadrante2),
     ..._gerarValoresMapa(q.quadrante3),
     ..._gerarValoresMapa(q.quadrante4),
-    ..._gerarValoresPeriodontal(q.condicaoPeriodontal), // Changed to specialized function
+    ..._gerarValoresPeriodontal(
+      q.condicaoPeriodontal,
+    ), // Changed to specialized function
     _extrairCodigo(q.urgencia),
   ];
 
@@ -88,13 +106,54 @@ Future<void> salvarQuestionarioCSVAppend(Questionario q) async {
 
   final bomUtf8 = utf8.encode('\uFEFF');
   final csvBytes = utf8.encode(csvData);
-  final bytesWithBom = <int>[]..addAll(bomUtf8)..addAll(csvBytes);
+  final bytesWithBom = <int>[]
+    ..addAll(bomUtf8)
+    ..addAll(csvBytes);
 
   await file.writeAsBytes(bytesWithBom);
 }
 
+/// Limpar questionários (limpar o CSV)
+Future<void> limparCSV() async {
+  try {
+    final directory = await getExternalStorageDirectory();
+    final path = directory!.path;
+    final file = File('$path/dados_formulario.csv');
+
+    // Se o arquivo não existe, não há nada para remover
+    if (!await file.exists()) return;
+
+    // Lê todo o conteúdo do CSV
+    final csvString = await file.readAsString();
+    List<List<dynamic>> rows = const CsvToListConverter().convert(csvString);
+
+    // Se não há dados, retorna
+    if (rows.length <= 1) return; // Apenas cabeçalho ou vazio
+
+    // Mantém apenas o cabeçalho
+    final apenasCabecalho = [rows.first];
+
+    // Converte de volta para CSV
+    String csvData = const ListToCsvConverter().convert(apenasCabecalho);
+
+    // Adiciona BOM para garantir compatibilidade com Excel
+    final bomUtf8 = utf8.encode('\uFEFF');
+    final csvBytes = utf8.encode(csvData);
+    final bytesWithBom = <int>[]
+      ..addAll(bomUtf8)
+      ..addAll(csvBytes);
+
+    // Reescreve o arquivo
+    await file.writeAsBytes(bytesWithBom);
+  } catch (e) {
+    throw Exception('Falha ao limpar o CSV');
+  }
+}
+
 /// Remove um questionário específico do arquivo CSV
-Future<void> removerQuestionarioDoCSV(Questionario questionarioParaRemover) async {
+Future<void> removerQuestionarioDoCSV(
+  Questionario questionarioParaRemover,
+) async {
   try {
     final directory = await getExternalStorageDirectory();
     final path = directory!.path;
@@ -115,18 +174,24 @@ Future<void> removerQuestionarioDoCSV(Questionario questionarioParaRemover) asyn
 
     // Filtra as linhas, mantendo apenas as que são diferentes da linha a ser removida
     // Pula o cabeçalho (primeira linha) na comparação
-    final linhasFiltradas = [rows.first] + // Mantém o cabeçalho
-        rows.skip(1).where((linha) => !_linhasSaoIguais(linha, linhaParaRemover)).toList();
+    final linhasFiltradas =
+        [rows.first] + // Mantém o cabeçalho
+        rows
+            .skip(1)
+            .where((linha) => !_linhasSaoIguais(linha, linhaParaRemover))
+            .toList();
 
     // Se o número de linhas diminuiu, significa que removemos uma entrada
     if (linhasFiltradas.length < rows.length) {
       // Converte de volta para CSV
       String csvData = const ListToCsvConverter().convert(linhasFiltradas);
-      
+
       // Adiciona BOM para garantir compatibilidade com Excel
       final bomUtf8 = utf8.encode('\uFEFF');
       final csvBytes = utf8.encode(csvData);
-      final bytesWithBom = <int>[]..addAll(bomUtf8)..addAll(csvBytes);
+      final bytesWithBom = <int>[]
+        ..addAll(bomUtf8)
+        ..addAll(csvBytes);
 
       // Reescreve o arquivo
       await file.writeAsBytes(bytesWithBom);
@@ -187,18 +252,21 @@ List<dynamic> _questionarioParaLinhaCSV(Questionario q) {
 /// Compara duas linhas CSV para verificar se são iguais
 bool _linhasSaoIguais(List<dynamic> linha1, List<dynamic> linha2) {
   if (linha1.length != linha2.length) return false;
-  
+
   for (int i = 0; i < linha1.length; i++) {
     if (linha1[i].toString() != linha2[i].toString()) {
       return false;
     }
   }
-  
+
   return true;
 }
 
 /// Gera cabeçalhos fixos para os campos padrão, incluindo PUFA
-List<String> _gerarCabecalhoMapa(Map<String, Map<String, String?>> mapa, String prefixo) {
+List<String> _gerarCabecalhoMapa(
+  Map<String, Map<String, String?>> mapa,
+  String prefixo,
+) {
   const camposPadrao = ['coroa', 'raiz', 'trat', 'pufa'];
   return mapa.entries.expand((e) {
     return camposPadrao.map((campo) => '$prefixo-${e.key}-$campo');
@@ -214,7 +282,9 @@ List<String> _gerarValoresMapa(Map<String, Map<String, String?>> mapa) {
 }
 
 /// Gera cabeçalhos específicos para condição periodontal
-List<String> _gerarCabecalhoPeriodontal(Map<String, Map<String, String?>> mapa) {
+List<String> _gerarCabecalhoPeriodontal(
+  Map<String, Map<String, String?>> mapa,
+) {
   const camposPeriodontal = ['Sangramento', 'Calculo', 'Bolsa', 'PIP'];
   return mapa.entries.expand((e) {
     return camposPeriodontal.map((campo) => 'Periodontal-${e.key}-$campo');

@@ -176,6 +176,42 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
     await _compartilharPlanilhas();
   }
 
+  Future<void> _limparDados() async {
+    bool confirmado = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Limpar dados'),
+        content: const Text(
+          'Tem certeza que deseja EXCLUIR TODOS os questionários? essa ação não pode ser revertida.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmado == true) {
+      setState(() {
+        limparCSV();
+        questionarios.clear();
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Questionários removidos.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
   String _gerarChaveUnica(Questionario q) {
     return '${q.dataExame ?? ''}_${q.idade ?? ''}_${q.estado ?? ''}';
   }
@@ -183,21 +219,42 @@ class _ListaQuestionariosPageState extends State<ListaQuestionariosPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Questionários Salvos'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.file_upload),
-            tooltip: 'Gerar planilhas e Sincronizar',
-            onPressed: _sincronizarDados,
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'Novo Questionário',
-            onPressed: _abrirQuestionario,
-          ),
-        ],
-      ),
+      appBar: questionarios.isEmpty
+          ? AppBar(
+              title: const Text('Questionários Salvos'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.file_upload),
+                  tooltip: 'Gerar planilhas e Sincronizar',
+                  onPressed: _sincronizarDados,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  tooltip: 'Novo Questionário',
+                  onPressed: _abrirQuestionario,
+                ),
+              ],
+            )
+          : AppBar(
+              title: const Text('Questionários Salvos'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.delete_forever, color: Colors.red),
+                  tooltip: 'Limpar os questionários',
+                  onPressed: _limparDados,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.file_upload),
+                  tooltip: 'Gerar planilhas e Sincronizar',
+                  onPressed: _sincronizarDados,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  tooltip: 'Novo Questionário',
+                  onPressed: _abrirQuestionario,
+                ),
+              ],
+            ),
       body: questionarios.isEmpty
           ? const Center(child: Text('Nenhum questionário encontrado.'))
           : ListView.builder(
